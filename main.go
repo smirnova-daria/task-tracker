@@ -122,37 +122,47 @@ func main() {
 	scanner := bufio.NewScanner(os.Stdin)
 
 	for scanner.Scan() {
-		input := scanner.Text()
+		isQuit, err := AnalyzeInput(scanner.Text())
 
-		inputSlice := strings.Split(input, " ")
+		if err != nil {
+			fmt.Println(err)
+		}
 
-		cmd := inputSlice[0]
-
-		if cmd == "Quit" {
+		if isQuit {
 			return
-		}
-
-		if tracker == nil && cmd != "StartApp" {
-			fmt.Println("please input 'StartApp' for start tracker")
-			continue
-		}
-
-		switch cmd {
-		case "StartApp":
-			tracker = New()
-		case "Add":
-			tracker.Add(inputSlice[1], inputSlice[2])
-		case "Find":
-			tracker.Find(inputSlice[1])
-		case "Del":
-			if len(inputSlice) > 2 {
-				tracker.DeleteTask(inputSlice[1], inputSlice[2])
-			} else {
-				tracker.DeleteAllTasks(inputSlice[1])
-			}
-		case "Print":
-			tracker.Print()
 		}
 	}
 
+}
+
+func AnalyzeInput(input string) (isQuit bool, err error) {
+	inputSlice := strings.Split(input, " ")
+
+	cmd := inputSlice[0]
+
+	if cmd == "Quit" {
+		return true, nil
+	}
+
+	if tracker == nil && cmd != "StartApp" {
+		return false, fmt.Errorf("please input 'StartApp' for start tracker")
+	}
+
+	switch cmd {
+	case "StartApp":
+		tracker = New()
+	case "Add":
+		tracker.Add(inputSlice[1], inputSlice[2])
+	case "Find":
+		tracker.Find(inputSlice[1])
+	case "Del":
+		if len(inputSlice) > 2 {
+			tracker.DeleteTask(inputSlice[1], inputSlice[2])
+		} else {
+			tracker.DeleteAllTasks(inputSlice[1])
+		}
+	case "Print":
+		tracker.Print()
+	}
+	return false, nil
 }
